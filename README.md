@@ -4,7 +4,7 @@
 ```
 1. Vue
 2. Firebase
-3. Cloudanary
+3. Cloudinary
 ```
 
 ## Project setup
