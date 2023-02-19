@@ -1,11 +1,14 @@
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 
 const useEntryDetail = (props) => {
-    const store = useStore()
-    const router = useRouter()
+    const store         = useStore()
+    const router        = useRouter()
+    const localImage    = ref()
+    const file          = ref()
+    const imageSelector = ref()
 
 
     let entry = store.getters['journal/getEntriesById'](props.id)
@@ -20,6 +23,9 @@ const useEntryDetail = (props) => {
     }
 
     return {
+        imageSelector,
+        localImage,
+        file,
         entry: computed(() => store.getters['journal/getEntriesById'](props.id) ? store.getters['journal/getEntriesById'](props.id) : entryNew),
         saveEntry: async ( entryUpdate ) => {
             if(entryUpdate.id){

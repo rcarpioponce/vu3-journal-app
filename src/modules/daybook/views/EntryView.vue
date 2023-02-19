@@ -12,7 +12,18 @@
                   Borrar
                   <i class="fa fa-trash-alt"></i>
               </button>
-              <button class="btn btn-primary">
+
+              <input 
+                ref="imageSelector"
+                type="file"
+                @change="onSelectedImage"
+                v-show="false"
+                accept="image/png, image/jpeg"
+              >
+              
+              <button 
+                    class="btn btn-primary" 
+                    @click="onSelectImage">
                   Subir foto
                   <i class="fa fa-upload"></i>
               </button>        
@@ -23,7 +34,18 @@
             @on:click="onSaveEntry"
           />
       
-          <img src="https://images.unsplash.com/photo-1675456110784-677355878495?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=928&q=80" alt="entry picture" class="img-thumbail" />
+          <img 
+            v-if="entry.picture && !localImage" 
+            :src="entry.picture" 
+            alt="entry picture" 
+            class="img-thumbail" />
+          
+          <img
+            v-if="localImage" 
+            :src="localImage" 
+            alt="entry picture" 
+            class="img-thumbail" 
+            />
       
         </div>
         <hr>
@@ -39,6 +61,8 @@ import useEntryDetail from '../composables/useEntryDetail'
 import useDayMonthYear from '../composables/useDayMonthYear'
 import Swal from 'sweetalert2'
 
+import uploadImage from '@/modules/daybook/helpers/uploadImage'
+
 
 export default {
     props: {
@@ -52,7 +76,10 @@ export default {
     },
     setup(props){
 
-        const { 
+        const {
+            imageSelector, 
+            localImage,
+            file,
             entry, 
             saveEntry,
             deleteEntry, 
@@ -71,6 +98,9 @@ export default {
 
         
         return {
+            imageSelector,
+            localImage,
+            file,
             entry,
             day,
             month,
@@ -82,7 +112,12 @@ export default {
                     allowOutsideClick: false
                 })
                 Swal.showLoading()
+                
+                const picture = await uploadImage(file.value)
+                entry.value.picture = picture
+
                 await saveEntry( entry.value )
+                localImage.value = null
                 Swal.fire('Guardado', 'Entrada registrada con éxito', 'success')
             },
             onDeleteEntry: async () => {
@@ -101,6 +136,20 @@ export default {
                     await deleteEntry( entry.value.id ) 
                     Swal.fire('Eliminado', '', 'success')
                 }
+            },
+            onSelectedImage( event ){
+                const fileR = event.target.files[0]
+                if(! fileR ){
+                    localImage.value = null
+                    return
+                }
+                file.value = fileR
+                const fileReader = new FileReader()
+                fileReader.onload = () => localImage.value= fileReader.result
+                fileReader.readAsDataURL(fileR)
+            },
+            onSelectImage() {
+                imageSelector.value.click()
             }
         } 
     }
